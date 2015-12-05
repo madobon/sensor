@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>CC2650 SensorTag</title>
+</head>
+<body>
+
+  <script>
+    var host = location.origin.replace(/^http/, 'ws')
+    var ws = new WebSocket(host);
+    ws.onmessage = function (event) {
+      console.log(JSON.parse(event.data));
+    };
+  </script>
+</body>
+</html>
