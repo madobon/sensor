@@ -14,5 +14,11 @@ gulp.task('babel', () => {
     .pipe(gulp.dest('dist'));
 });
 
+// watch
+gulp.task('watch', function() {
+  gulp.watch('src/**.js', ['babel'])
+  gulp.watch('src/**.html', ['html'])
+});
+
 // default
-gulp.task('default', ['html', 'babel']);
+gulp.task('default', ['html', 'babel', 'watch']);
