@@ -9,7 +9,7 @@ import SensorTag from 'sensortag'
 const redis = createClient();
 const app = express();
 const port = process.env.PORT || 3000;
-const PERIOD = process.argv[2] || 1000 * 5;
+const PERIOD = process.argv[2] || 1000 * 60;
 
 // express setting
 app.use(express.static(__dirname + "/"));
@@ -195,7 +195,10 @@ SensorTag.discover(tag => {
 
               sensordataset.push(sensordata);
 
-              redis.set('sensordataset', JSON.stringify(sensordataset));
+              // redis.set('sensordataset', JSON.stringify(sensordataset));
+
+              let now = Date.now();
+              redis.zadd('sensor', now, JSON.stringify(sensordata));
             });
           });
         }, PERIOD);
@@ -207,14 +210,23 @@ SensorTag.discover(tag => {
           connects.push(ws);
           console.log('connects: %d', connects.length);
 
-          redis.get('sensordataset', (err, result) => {
-            if (err) {
-              return err;
-            }
-            if (result) {
-              sensordataset = JSON.parse(result);
-              ws.send(JSON.stringify({type: 'init', sensordataset}), () => {});
-            }
+          // redis.get('sensordataset', (err, result) => {
+          //   if (err) throw err;
+          //   sensordataset = JSON.parse(result);
+          //   ws.send(JSON.stringify({type: 'init', sensordataset}), () => {});
+          // });
+
+          let sensordata = {};
+
+          // 1日前のデータまで取得
+          let ago = Date.now() - 86400000;
+
+          redis.zrevrangebyscore('sensor', '+inf', ago, function(err, result){
+            if (err) throw err;
+            sensordataset = result.map((element, index, array) => {
+              return JSON.parse(element)
+            })
+            ws.send(JSON.stringify({type: 'init', sensordataset}), () => {});
           });
 
           ws.on("close", () => {
