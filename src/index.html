@@ -40,26 +40,26 @@
     global.Chart = Chart;
 
     function Chart() {
-       this.datas = [];
+       this._datas = [];
     }
 
     // グラフを描画するdivのidを指定する
-    Chart.prototype.setSvg = function(wrapper_id) {
-      this.wrapper_id =  wrapper_id || 'svg-chart';
+    Chart.prototype.setSvg = function(wrapperId) {
+      this._wrapperId =  wrapperId || 'svg-chart';
     }
 
     // 描画するデータをセット／更新
     Chart.prototype.setDatas = function(datas) {
-      this.datas = datas;
+      this._datas = datas;
     }
 
     // 初期化
     Chart.prototype.init = function() {
 
       // 描画範囲に関する変数
-      var margin = {top: 20, right: 20, bottom: 30, left: 40},
-          width = 800 - margin.left - margin.right,
-          height = 400 - margin.top - margin.bottom;
+      var margin = {top: 20, right: 40, bottom: 20, left: 40},
+          width = 720 - margin.left - margin.right,
+          height = 480 - margin.top - margin.bottom;
 
       // x軸のスケール（時間）。レンジ(出力範囲)の指定
       var xScale = d3.time.scale()
@@ -80,11 +80,11 @@
                   .orient("left");
 
       // SVG要素の作成（attrとかはテンプレ）
-      var svg = d3.select("#" + this.wrapper_id).append("svg")
+      var svg = d3.select("#" + this._wrapperId).append("svg")
                 .attr("class", "chart")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
-              .append("g")
+                .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       // 折れ線グラフの設定。xに時間、yにセンサーデータの値を設定。
@@ -100,42 +100,42 @@
 
 
       // もろもろをメンバ変数に
-      this.height = height;
-      this.margin = margin;
-      this.width = width;
-      this.xScale = xScale;
-      this.yScale = yScale;
-      this.xAxis = xAxis;
-      this.yAxis = yAxis;
-      this.svg = svg;
-      this.line = line;
+      this._height = height;
+      this._margin = margin;
+      this._width = width;
+      this._xScale = xScale;
+      this._yScale = yScale;
+      this._xAxis = xAxis;
+      this._yAxis = yAxis;
+      this._svg = svg;
+      this._line = line;
     }
 
 
     // 最初の描画
     Chart.prototype.initialDraw = function() {
 
-      var dataset = this.datas;
+      var dataset = this._datas;
 
       // ドメイン（入力値の範囲）の設定、extentメソッドでdatasetの最小と最大を返す
-      this.xScale.domain(d3.extent(dataset, function(d) { return d.date; }));
-      this.yScale.domain(d3.extent(dataset, function(d) { return d.value; }));
+      this._xScale.domain(d3.extent(dataset, function(d) { return d.date; }));
+      this._yScale.domain(d3.extent(dataset, function(d) { return d.value; }));
 
       // x軸の描画
-      this.svg.append("g")
+      this._svg.append("g")
               .attr("class", "x axis")
-              .attr("transform", "translate(0," + this.height + ")")
-              .call(this.xAxis)
+              .attr("transform", "translate(0," + this._height + ")")
+              .call(this._xAxis)
               .append("text")
-              .attr("x", this.width)
+              .attr("x", this._width)
               .attr("dx", ".71em")
               .style("text-anchor", "end")
               .text("時間");
 
       // y軸の描画
-      this.svg.append("g")
+      this._svg.append("g")
               .attr("class", "y axis")
-              .call(this.yAxis)
+              .call(this._yAxis)
               .append("text")
               .attr("transform", "rotate(-90)")
               .attr("y", 6)
@@ -144,36 +144,36 @@
               .text("値");
 
       // 折れ線の描画
-      this.svg.append("path")
+      this._svg.append("path")
               .datum(dataset)
               .attr("class", "line")
-              .attr("d", this.line);
+              .attr("d", this._line);
     }
 
 
     // 更新した際の描画
     Chart.prototype.updateDraw = function() {
 
-      var dataset = this.datas;
+      var dataset = this._datas;
 
       // ドメイン（入力値の範囲）の更新
-      this.xScale.domain(d3.extent(dataset, function(d) { return d.date; }));
-      this.yScale.domain(d3.extent(dataset, function(d) { return d.value; }));
+      this._xScale.domain(d3.extent(dataset, function(d) { return d.date; }));
+      this._yScale.domain(d3.extent(dataset, function(d) { return d.value; }));
 
       // アニメーションしますよ、という宣言
-      this.svg = d3.select("#" + this.wrapper_id).transition();
+      this._svg = d3.select("#" + this._wrapperId).transition();
 
-      this.svg.select(".line")   // 折れ線を
-          .duration(750) // 750msで
-          .attr("d", this.line(dataset)); // （新しい）datasetに変化させる描画をアニメーション
+      this._svg.select(".line")   // 折れ線を
+          .duration(1000) // 1000msで
+          .attr("d", this._line(dataset)); // （新しい）datasetに変化させる描画をアニメーション
 
-      this.svg.select(".x.axis") // x軸を
-          .duration(750) // 750msで
-          .call(this.xAxis); // （domainの変更によって変化した）xAxisに変化させる描画をアニメーション
+      this._svg.select(".x.axis") // x軸を
+          .duration(1000) // 1000msで
+          .call(this._xAxis); // （domainの変更によって変化した）xAxisに変化させる描画をアニメーション
 
-      this.svg.select(".y.axis") // y軸を
-          .duration(750) // 750msで
-          .call(this.yAxis); // （domainの変更によって変化した）yAxisに変化させる描画をアニメーション
+      this._svg.select(".y.axis") // y軸を
+          .duration(1000) // 1000msで
+          .call(this._yAxis); // （domainの変更によって変化した）yAxisに変化させる描画をアニメーション
     }
 
   }(window));
@@ -181,7 +181,7 @@
   var host = location.origin.replace(/^http/, 'ws')
   var ws = new WebSocket(host);
 
-  var dataset = [];
+  var sensorData = [];
 
   var chart = new Chart();
       chart.setSvg("svgchart");
@@ -203,29 +203,30 @@
     var eventData = JSON.parse(event.data);
 
     switch (eventData.type) {
-      case 'init':
-        dataset = eventData.sensordataset.map(function(obj){
-          return {
-            date: obj.date,
-            value: obj.temperature
-          }
-        });
-        chart.setDatas(dataset);
-        chart.initialDraw();
-        break;
-      case 'update':
-        if (dataset.length > 30) {
-          dataset.shift();
+    case 'init':
+      sensorData = eventData.sensordataset.map(function(obj){
+        return {
+          date: obj.date,
+          value: obj.temperature.toFixed(1)
         }
-        dataset.push({
-          date: eventData.sensordata.date,
-          value: eventData.sensordata.temperature,
-        });
-        chart.setDatas(dataset);
-        chart.updateDraw();
-        break;
-      default:
+      });
+      chart.setDatas(sensorData);
+      chart.initialDraw();
+      break;
+    case 'update':
+      sensorData.push({
+        date: eventData.sensordata.date,
+        value: eventData.sensordata.temperature.toFixed(1),
+      });
+      sensorData.shift();
+      chart.setDatas(sensorData);
+      chart.updateDraw();
+      break;
+    default:
+      throw Error("not defined");
     }
+
+    console.table(sensorData);
   };
   </script>
 </body>
