@@ -206,8 +206,8 @@
     case 'init':
       sensorData = eventData.sensordataset.map(function(obj){
         return {
-          date: obj.date,
-          value: obj.temperature.toFixed(1)
+          date: new Date(obj.date),
+          value: +obj.temperature.toFixed(1)
         }
       });
       chart.setDatas(sensorData);
@@ -215,8 +215,8 @@
       break;
     case 'update':
       sensorData.push({
-        date: eventData.sensordata.date,
-        value: eventData.sensordata.temperature.toFixed(1),
+        date: new Date(eventData.sensordata.date),
+        value: +eventData.sensordata.temperature.toFixed(1),
       });
       sensorData.shift();
       chart.setDatas(sensorData);
