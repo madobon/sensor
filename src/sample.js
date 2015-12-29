@@ -9,7 +9,7 @@ import SensorTag from 'sensortag'
 const redis = createClient();
 const app = express();
 const port = process.env.PORT || 3000;
-const PERIOD = process.argv[2] || 1000 * 60;
+const PERIOD = process.argv[2] || 1000 * 5;
 
 // express setting
 app.use(express.static(__dirname + "/"));
