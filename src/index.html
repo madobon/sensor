@@ -19,9 +19,18 @@
     .x.axis path {
       display:none;
     }
+
+    .y.l.axis {
+      stroke:#1572F9;
+    }
+
+    .y.r.axis {
+      stroke:#F96F15;
+    }
+
     .line {
       fill:none;
-      stroke-width:2.0px;
+      stroke-width:1.5px;
     }
 
     .l.line {
@@ -32,13 +41,13 @@
       stroke:#F96F15;
     }
     text {
-      font-size:10px;
+      font-size:0.8em;
     }
 </style>
   <title>CC2650 SensorTag</title>
 </head>
 <body>
-	<div id="svgchart" style="margin: 0 auto; width: 600px;"></div>
+	<div id="svgchart" style="margin: 0 auto;"></div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
   <script>
 
@@ -84,8 +93,8 @@
 
       // 描画範囲に関する変数
       var margin = {top: 50, right: 50, bottom: 50, left: 50},
-          width = 600 - margin.left - margin.right,
-          height = 270 - margin.top - margin.bottom;
+          width = 800 - margin.left - margin.right,
+          height = 600 - margin.top - margin.bottom;
 
       // x軸のスケール（時間）。レンジ(出力範囲)の指定
       var xScale = d3.time.scale()
@@ -191,10 +200,8 @@
               .attr("class", "y l axis")
               .call(this._ylAxis)
               .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
+              .attr("y", this._margin.top / 2)
+              .attr("dy", -this._margin.top)
               .text(this._ylLabel);
 
       // y軸の描画
@@ -203,10 +210,8 @@
               .attr("transform", "translate(" + this._width + ", 0)")
               .call(this._yrAxis)
               .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
+              .attr("y", this._margin.top / 2)
+              .attr("dy", -this._margin.top)
               .text(this._yrLabel);
 
       // 折れ線の描画
@@ -270,7 +275,7 @@
 
   var chart = new Chart();
       chart.setSvg("svgchart");
-      chart.init();
+      chart.init(null, '温度', '湿度');
 
   ws.onopen = function() {
     console.log('Connection opened.');
