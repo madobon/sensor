@@ -22,7 +22,7 @@
     .line {
       fill:none;
       stroke:#1572F9;
-      stroke-width:1.5px;
+      stroke-width:2.0px;
     }
     text {
       font-size:10px;
@@ -31,35 +31,52 @@
   <title>CC2650 SensorTag</title>
 </head>
 <body>
-	<div id="svgchart" style="margin: 0 auto; width: 1040px;"></div>
+	<div id="svgchart" style="margin: 0 auto; width: 600px;"></div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
   <script>
 
+  /**
+   * reference: http://blog.mlkcca.com/iot/realtime-data-visualization-with-raspberry-pi-3/
+   */
   (function(global){
+    'use strict';
 
     global.Chart = Chart;
 
+    /**
+     * コンストラクタ
+     */
     function Chart() {
        this._datas = [];
     }
 
-    // グラフを描画するdivのidを指定する
+    /**
+     * グラフを描画するdivのidを指定する
+     * @param  {String} wrapperId 描画ID
+     */
     Chart.prototype.setSvg = function(wrapperId) {
-      this._wrapperId =  wrapperId || 'svg-chart';
+      this._wrapperId =  wrapperId || 'svgchart';
     }
 
-    // 描画するデータをセット／更新
+    /**
+     * 描画するデータをセット／更新
+     * @param  {Array}  datas 描画用のデータ（日付の降順）
+     *         {Date}   datas[i].date 日付
+     *         {Number} datas[i].value 値
+     */
     Chart.prototype.setDatas = function(datas) {
       this._datas = datas;
     }
 
-    // 初期化
+    /**
+     * グラフの描画に必要な初期処理を実行する
+     */
     Chart.prototype.init = function() {
 
       // 描画範囲に関する変数
-      var margin = {top: 20, right: 40, bottom: 20, left: 40},
-          width = 720 - margin.left - margin.right,
-          height = 480 - margin.top - margin.bottom;
+      var margin = {top: 20, right: 20, bottom: 30, left: 50},
+          width = 600 - margin.left - margin.right,
+          height = 270 - margin.top - margin.bottom;
 
       // x軸のスケール（時間）。レンジ(出力範囲)の指定
       var xScale = d3.time.scale()
@@ -89,6 +106,7 @@
 
       // 折れ線グラフの設定。xに時間、yにセンサーデータの値を設定。
       var line = d3.svg.line()
+                  .interpolate("linear")
                   .x(function(d) {
                     // xスケールでマップされた時間を返す
                     return xScale(d.date);
@@ -112,7 +130,9 @@
     }
 
 
-    // 最初の描画
+    /**
+     * 初期表示時の描画
+     */
     Chart.prototype.initialDraw = function() {
 
       var dataset = this._datas;
@@ -145,13 +165,14 @@
 
       // 折れ線の描画
       this._svg.append("path")
-              .datum(dataset)
               .attr("class", "line")
-              .attr("d", this._line);
+              .attr("d", this._line(dataset));
     }
 
 
-    // 更新した際の描画
+    /**
+     * 更新時の描画
+     */
     Chart.prototype.updateDraw = function() {
 
       var dataset = this._datas;
@@ -163,21 +184,23 @@
       // アニメーションしますよ、という宣言
       this._svg = d3.select("#" + this._wrapperId).transition();
 
-      this._svg.select(".line")   // 折れ線を
-          .duration(1000) // 1000msで
-          .attr("d", this._line(dataset)); // （新しい）datasetに変化させる描画をアニメーション
-
       this._svg.select(".x.axis") // x軸を
-          .duration(1000) // 1000msで
+          .duration(750) // 750msで
           .call(this._xAxis); // （domainの変更によって変化した）xAxisに変化させる描画をアニメーション
 
       this._svg.select(".y.axis") // y軸を
-          .duration(1000) // 1000msで
+          .duration(750) // 750msで
           .call(this._yAxis); // （domainの変更によって変化した）yAxisに変化させる描画をアニメーション
+
+      this._svg.select(".line")   // 折れ線を
+          .duration(750) // 750msで
+          .attr("d", this._line(dataset)); // （新しい）datasetに変化させる描画をアニメーション
+
     }
 
   }(window));
 
+  var debug = false;
   var host = location.origin.replace(/^http/, 'ws')
   var ws = new WebSocket(host);
 
@@ -214,11 +237,14 @@
       chart.initialDraw();
       break;
     case 'update':
-      sensorData.push({
+      // 先頭に最新データを追加
+      sensorData.unshift({
         date: new Date(eventData.sensordata.date),
         value: +eventData.sensordata.temperature.toFixed(1),
       });
-      sensorData.shift();
+      // 末尾の過去データを削除
+      sensorData.pop();
+
       chart.setDatas(sensorData);
       chart.updateDraw();
       break;
@@ -226,7 +252,9 @@
       throw Error("not defined");
     }
 
-    console.table(sensorData);
+    if (debug) {
+      console.table(sensorData);
+    }
   };
   </script>
 </body>
