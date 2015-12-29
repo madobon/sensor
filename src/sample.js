@@ -82,7 +82,7 @@ SensorTag.discover(tag => {
           let sensordata = {};
 
           // 1日前のデータまで取得
-          let ago = Date.now() - 86400000;
+          let ago = Date.now() - (1000 * 60 * 60 * 24);
 
           redis.zrevrangebyscore('sensor', '+inf', ago, function(err, result){
             if (err) throw err;
