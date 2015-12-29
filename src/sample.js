@@ -2,7 +2,6 @@ import 'babel-polyfill'
 import {Server as WebSocketServer} from 'ws'
 import http from 'http'
 import express from 'express'
-import request from 'request';
 import {createClient} from 'redis'
 import SensorTag from 'sensortag'
 

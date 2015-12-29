@@ -14,7 +14,6 @@
   "dependencies": {
     "express": "^4.13.3",
     "redis": "^2.4.2",
-    "request": "^2.67.0",
     "sensortag": "^1.2.0",
     "ws": "^0.8.1"
   },
