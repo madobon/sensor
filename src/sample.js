@@ -51,22 +51,18 @@ SensorTag.discover(tag => {
             console.log(`${sensorInfo} 温度: ${temperature.toFixed(1)} °C`);
             console.log(`${sensorInfo} 湿度: ${humidity.toFixed(1)} %`);
 
+            let humidityData = {
+              date: Date.now(),
+              temperature: temperature,
+              humidity: humidity
+            };
+
+            let sensordata = humidityData;
+
+            redis.zadd('sensor', Date.now(), JSON.stringify(sensordata));
+
             connects.forEach(ws => {
-
-              let humidityData = {
-                date: Date.now(),
-                temperature: temperature,
-                humidity: humidity
-              };
-
-              let sensordata = humidityData;
-
               ws.send(JSON.stringify({type: 'update', sensordata}), () => {});
-
-              sensordataset.push(sensordata);
-
-              let now = Date.now();
-              redis.zadd('sensor', now, JSON.stringify(sensordata));
             });
           });
         }, PERIOD);
